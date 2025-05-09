@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Calculadora de Ângulo de Cone e Torneamento</title>
+  <style>
+    :root {
+      --bg-color: #1e1e2f;
+      --container-bg: #2c2c3c;
+      --text-color: #ffffff;
+      --input-bg: #3b3b4f;
+      --primary-button: #4caf50;
+      --secondary-button: #f44336;
+      --resultado-bg: #3b3b4f;
+    }
+    body.light {
+      --bg-color: #f0f0f0;
+      --container-bg: #ffffff;
+      --text-color: #000000;
+      --input-bg: #dddddd;
+      --primary-button: #4caf50;
+      --secondary-button: #f44336;
+      --resultado-bg: #eeeeee;
+    }
+    body {
+      background: var(--bg-color);
+      color: var(--text-color);
+      font-family: Arial, sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+      transition: all 0.3s ease;
+    }
+    .container {
+      background: var(--container-bg);
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 0 15px rgba(0,0,0,0.5);
+      width: 100%;
+      max-width: 400px;
+      transition: background 0.3s ease;
+    }
+    h2 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    label {
+      margin-top: 15px;
+      display: block;
+      font-size: 14px;
+    }
+    input, select {
+      width: 100%;
+      padding: 10px;
+      margin-top: 5px;
+      border-radius: 5px;
+      border: none;
+      margin-bottom: 15px;
+      background: var(--input-bg);
+      color: var(--text-color);
+      font-size: 16px;
+      transition: background 0.3s ease;
+    }
+    button {
+      width: 48%;
+      padding: 12px;
+      margin-top: 10px;
+      font-size: 16px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    button#calcular {
+      background-color: var(--primary-button);
+      color: white;
+    }
+    button#limpar {
+      background-color: var(--secondary-button);
+      color: white;
+    }
+    button#toggleTheme {
+      width: 100%;
+      background-color: #008cba;
+      margin-top: 20px;
+    }
+    #resultado {
+      margin-top: 20px;
+      font-size: 18px;
+      background: var(--resultado-bg);
+      padding: 15px;
+      border-radius: 5px;
+      text-align: center;
+      transition: background 0.3s ease;
+    }
+    .botoes {
+      display: flex;
+      justify-content: space-between;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <h2>Calculadora de Ângulo de Cone</h2>
+  
+  <label for="diametroA">Diâmetro da Ponta A (mm):</label>
+  <input type="number" id="diametroA" step="any">
+
+  <label for="diametroB">Diâmetro da Ponta B (mm):</label>
+  <input type="number" id="diametroB" step="any">
+
+  <label for="comprimento">Comprimento do Cone (mm):</label>
+  <input type="number" id="comprimento" step="any">
+
+  <label for="material">Selecione o material:</label>
+  <select id="material">
+    <option value="">-- Escolher material --</option>
+    <option value="aco_carbono">Aço Carbono</option>
+    <option value="aluminio">Alumínio</option>
+    <option value="latao">Latão</option>
+    <option value="aco_inox">Aço Inoxidável</option>
+    <option value="nylon">Nylon (Plástico)</option>
+  </select>
+
+  <div class="botoes">
+    <button id="calcular" onclick="calcularAngulo()">Calcular</button>
+    <button id="limpar" onclick="limparCampos()">Limpar</button>
+  </div>
+
+  <button id="toggleTheme" onclick="toggleTheme()">Alternar Tema</button>
+
+  <div id="resultado"></div>
+</div>
+
+<script>
+/**
+ * Função principal que calcula o ângulo e apresenta o resultado
+ * Também mostra sugestões conforme o material escolhido
+ */
+function calcularAngulo() {
+    const diametroA = parseFloat(document.getElementById('diametroA').value);
+    const diametroB = parseFloat(document.getElementById('diametroB').value);
+    const comprimento = parseFloat(document.getElementById('comprimento').value);
+
+    if (isNaN(diametroA) || isNaN(diametroB) || isNaN(comprimento) || comprimento === 0) {
+        document.getElementById('resultado').innerHTML = "<span style='color: #ff6b6b;'>Por favor, insira valores válidos!</span>";
+        return;
+    }
+
+    const raioA = diametroA / 2;
+    const raioB = diametroB / 2;
+    const catetoOposto = Math.abs(raioA - raioB);
+    const catetoAdjacente = comprimento;
+    const tangente = catetoOposto / catetoAdjacente;
+    const anguloRad = Math.atan(tangente);
+    const anguloGrausDecimal = anguloRad * (180 / Math.PI);
+
+    const graus = Math.floor(anguloGrausDecimal);
+    const minutosDecimais = (anguloGrausDecimal - graus) * 60;
+    const minutos = Math.floor(minutosDecimais);
+    const segundos = (minutosDecimais - minutos) * 60;
+
+    document.getElementById('resultado').innerHTML = `
+        Ângulo em decimal: <strong>${anguloGrausDecimal.toFixed(6)}°</strong><br>
+        Ângulo em Graus, Minutos e Segundos (GMS):<br>
+        <strong>${graus}° ${minutos}' ${segundos.toFixed(2)}"</strong>
+    `;
+
+    const materialSelecionado = document.getElementById('material').value;
+    if (materialSelecionado) {
+        const materiais = {
+            "aco_carbono": {
+                nome: "Aço Carbono",
+                ferramenta: "Pastilha de metal duro",
+                rpm: "80 - 120 RPM",
+                passos: "1. Escolher pastilha CBN ou WNMG; 2. Definir avanço médio; 3. Usar óleo de corte abundante."
+            },
+            "aluminio": {
+                nome: "Alumínio",
+                ferramenta: "Aço rápido (HSS)",
+                rpm: "200 - 600 RPM",
+                passos: "1. Utilizar ferramenta com ângulo positivo; 2. Pouco fluido; 3. Corte rápido e contínuo."
+            },
+            "latao": {
+                nome: "Latão",
+                ferramenta: "Aço rápido (HSS)",
+                rpm: "300 - 800 RPM",
+                passos: "1. Trabalhar seco ou mínima lubrificação; 2. Avanço leve; 3. Cortes constantes."
+            },
+            "aco_inox": {
+                nome: "Aço Inoxidável",
+                ferramenta: "Pastilha de metal duro",
+                rpm: "60 - 100 RPM",
+                passos: "1. Pastilha com alto poder de corte; 2. Avanço mais lento; 3. Refrigeração intensa."
+            },
+            "nylon": {
+                nome: "Nylon (Plástico)",
+                ferramenta: "Aço rápido (HSS)",
+                rpm: "400 - 1000 RPM",
+                passos: "1. Sem fluido de corte; 2. Avanço médio; 3. Evitar superaquecimento."
+            }
+        };
+
+        const material = materiais[materialSelecionado];
+        document.getElementById('resultado').innerHTML += `
+            <hr>
+            <strong>Material selecionado:</strong> ${material.nome}<br>
+            <strong>Ferramenta ideal:</strong> ${material.ferramenta}<br>
+            <strong>Velocidade de giro:</strong> ${material.rpm}<br>
+            <strong>Passos recomendados:</strong> ${material.passos}
+        `;
+    }
+}
+
+/**
+ * Função que limpa todos os campos e resultados
+ */
+function limparCampos() {
+    document.getElementById('diametroA').value = '';
+    document.getElementById('diametroB').value = '';
+    document.getElementById('comprimento').value = '';
+    document.getElementById('material').value = '';
+    document.getElementById('resultado').innerHTML = '';
+}
+
+/**
+ * Função que alterna o tema escuro/claro
+ */
+function toggleTheme() {
+    document.body.classList.toggle('light');
+}
+</script>
+
+</body>
+</html>
